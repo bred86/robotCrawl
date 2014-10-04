@@ -4,6 +4,7 @@ import urllib2, gzip, re
 from StringIO import StringIO
 
 urlMaster = "http://www.epocacosmeticos.com.br"
+urlListLvl1 = []
 
 def getUrl (url, fileName):
 	hr = urllib2.Request(url)
@@ -22,7 +23,10 @@ def getUrl (url, fileName):
 
 	try:
 		fd1 = open(fileName, "w")
-		fd1.write(data)
+		if "lvl1" in fileName:
+			fd1.write(data)
+		else:
+			fd1.write(data.replace("><", ">\n<"))
 		fd1.close()
 	except:
 		print "Erro: Canno't create file "+fileName
@@ -39,13 +43,31 @@ if getUrl(url, "/tmp/lvl1.tmp"):
 			fd3.write(line.replace("><", ">\n<"))
 			fd3.close()
 
-	fd3 = open("/tmp/lvl1_urls.tmp")
+	fd3 = open("/tmp/lvl1_urls.tmp", "r")
 	for line in fd3:
 		if "href" in line:
 			keep1 = line
 		if "src=\"/arquivos" in line:
-			print "http://www.epocacosmeticos.com.br"+re.search('"(.*?)"', keep1.replace("\n", "")).group(0).replace("\"", "")
+			urlListLvl1.append("http://www.epocacosmeticos.com.br"+re.search('"(.*?)"', keep1.replace("\n", "")).group(0).replace("\"", ""))
 		if "www.epocacosmeticos.com.br" in line and not "menu-item-texto" in line:
-			print re.search('"(.*?)"', line.replace("\n", "")).group(0).replace("\"", "")
+			urlListLvl1.append(re.search('"(.*?)"', line.replace("\n", "")).group(0).replace("\"", ""))
 	fd3.close()
 
+urlListLvl1.sort()
+tmpFD4 = 1
+for url in urlListLvl1:
+	flag = 0
+	menu = ""
+	getUrl(url, "/tmp/lvl2-"+str(tmpFD4))
+	for line in open("/tmp/lvl2-"+str(tmpFD4), "r"):
+		if "search-single-navigator" in line:
+			flag = 1
+		if flag == 1 and ("<h3 class=" in line):
+			menu = line.split("\"")[1]
+		if flag == 1 and "<ul class=\""+menu.lower()+"\">" in line.lower():
+			flag = 2
+		if flag == 2 and "<a href" in line:
+			print line.split("\"")[1]
+		if flag == 2 and "</ul>" in line:
+			flag = 1
+	tmpFD4 += 1
