@@ -1,40 +1,14 @@
 #!/usr/bin/python
 
-import urllib2, gzip, re
-from StringIO import StringIO
+import LibUrl, re
 
 urlMaster = "http://www.epocacosmeticos.com.br"
 urlListLvl1 = []
 
-def getUrl (url, fileName):
-	hr = urllib2.Request(url)
-	hr.add_header("User-Agent:", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1")
-	hr.add_header("Accept:", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-	hr.add_header('Accept-encoding', 'gzip')
-	httpReq = urllib2.urlopen(hr)
-	if httpReq.info().get('Content-Encoding') == 'gzip':
-		buf = StringIO(httpReq.read())
-		f = gzip.GzipFile(fileobj=buf)
-		data = f.read()
-	else:
-		data = httpReq.read()
-
-	httpReq.close()
-
-	try:
-		fd1 = open(fileName, "w")
-		if "lvl1" in fileName:
-			fd1.write(data)
-		else:
-			fd1.write(data.replace("><", ">\n<"))
-		fd1.close()
-	except:
-		print "Erro: Canno't create file "+fileName
-		return None
-	else:
-		return True
+getUrl = LibUrl.getUrl
 
 url = urlMaster + "/marcas"
+print "LVL 1"
 if getUrl(url, "/tmp/lvl1.tmp"):
 	fd2 = open("/tmp/lvl1.tmp", "r")
 	for line in fd2:
@@ -55,6 +29,8 @@ if getUrl(url, "/tmp/lvl1.tmp"):
 
 urlListLvl1.sort()
 tmpFD4 = 1
+print "LVL 2"
+fd4 = open ("/tmp/lvl3-list.url", "w")
 for url in urlListLvl1:
 	flag = 0
 	menu = ""
@@ -67,7 +43,30 @@ for url in urlListLvl1:
 		if flag == 1 and "<ul class=\""+menu.lower()+"\">" in line.lower():
 			flag = 2
 		if flag == 2 and "<a href" in line:
+			fd4.write(line.split("\"")[1])
 			print line.split("\"")[1]
 		if flag == 2 and "</ul>" in line:
 			flag = 1
 	tmpFD4 += 1
+	break
+fd4.close()
+
+print "LVL 3"
+tmpFD5 = 1
+for line in open("/tmp/lvl3-list.url", "r"):
+	if getUrl(line, "/tmp/lvl3-"+str(tmpFD5)+".html"):
+		for line in open("/tmp/lvl3-"+str(tmpFD5)+".html", "r"):
+			if "<h3><a title=" in line:
+				print "/tmp/lvl4-"+str(tmpFD5)+".html", line.split("\"")[3]
+				getUrl(line.split("\"")[3], "/tmp/lvl4-"+str(tmpFD5)+".html")
+			tmpFD5 += 1
+	break
+
+print "LVL 4"
+tmpFD6 = 1
+for line in open("/tmp/lvl4-"+str(tmpFD6)+".html", "r"):
+	if "sku-ean-code" in line:
+		print "REF: "+ line.split(">")[1].split("<")[0]
+	if "skuBestPrice" in line:
+		print "Price: "+line.split(">")[2].split("<")[0]
+	tmpFD6 += 1
