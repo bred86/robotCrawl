@@ -7,11 +7,11 @@ getUrl = LibUrl.getUrl
 
 def prettyPrint(number):
 	if number < 10:
-		numStr = "00"+str(number)
+		numStr = "0000"+str(number)
 	elif number < 100:
-		numStr = "0"+str(number)
+		numStr = "000"+str(number)
 	else:
-		numStr = str(number)
+		numStr = "00"+str(number)
 
 	return numStr
 
@@ -71,7 +71,7 @@ if mkdir(lvl1Dir):
 lvl2Dir = "/tmp/lvl2"
 mkdir(lvl2Dir)
 fileNumber = 0
-print "["+str(datetime.datetime.now())+"][Level 2] Fetching all brand's pages"
+print "["+str(datetime.datetime.now())+"][Level 2] Fetching all brands' pages"
 for url in open(lvl1Dir+"/brand.url", "r"):
 	lvl2File = lvl2Dir+"/"+str(fileNumber)+".html"
 	lvl2FileNext = lvl2Dir+"/"+str(fileNumber + 1)+".html"
@@ -80,7 +80,7 @@ for url in open(lvl1Dir+"/brand.url", "r"):
 	beenHere = 0
 	menu = ""
 
-	if not os.path.exists(lvl2FileNext):
+	if ((not os.path.exists(lvl2FileNext)) and (not os.path.exists(lvl2File))):
 		if getUrl(url, lvl2File):
 			for line in open(lvl2File, "r"):
 				if "search-single-navigator" in line:
@@ -99,24 +99,65 @@ for url in open(lvl1Dir+"/brand.url", "r"):
 				print "["+str(datetime.datetime.now())+"][Level 2][ERROR] "+url.replace("\n","")
 				appendFile(lvl2Dir+"/errors.url", url)
 		else:
-			print "["+str(datetime.datetime.now())+"][Level 2][ERROR] "+url.replace("\n","")
+			print "["+str(datetime.datetime.now())+"][Level 2][ERROR] Can not get "+url.replace("\n","")
 			appendFile(lvl2Dir+"/errors.url", url)
 	fileNumber += 1
+
+if os.path.exists(lvl2Dir+"/errors.url"):
+	fileNumber = 0
+	for url in open(lvl2Dir+"/errors.url", "r"):
+		if getUrl(url, lvl2Dir+"/"+str(fileNumber)+"-retry.html"):
+			for line in open(lvl2Dir+"/"+str(fileNumber)+"-retry.html", "r"):
+				if "search-single-navigator" in line:
+					flag = 1
+				if ((flag == 1) and ("?PS=20" in line) and ("<a href" in line)):
+					print "["+str(datetime.datetime.now())+"][Level 2][Retrying]["+prettyPrint(fileNumber)+"] "+ line.replace("\n", "").split("\"")[1]
+					appendFile(lvl2Dir+"/brands.url", line.split("\"")[1]+"\n")
+		fileNumber += 1
+	os.remove(lvl2Dir+"/errors.url")
 
 lvl3Dir = "/tmp/lvl3"
 mkdir(lvl3Dir)
 fileNumber = 0
 print "["+str(datetime.datetime.now())+"][Level 3] Getting information about the product"
 for line in open(lvl2Dir+"/brands.url", "r"):
-	if getUrl(line, lvl3Dir+"/"+str(fileNumber)+".html"):
-		for line in open(lvl3Dir+"/"+str(fileNumber)+".html", "r"):
+	if getUrl(line, lvl3Dir+"/"+str(fileNumber)+"-brandPage.html"):
+		head = ""
+		for line in open(lvl3Dir+"/"+str(fileNumber)+"-brandPage.html"	, "r"):
 			product = ""
 			productUrl = ""
 			sku = ""
+			flag = 0
+
+			if "<title>" in line:
+				head = line.split("<title>")[1].split("<")[0]
+
 			if "<h3><a title=" in line:
 				product = str(line.split("\"")[1])
 				productUrl = str(line.split("\"")[3])
-				getUrl(productUrl, lvl3Dir+"/productPage.html")
-				sku = getSKU(lvl3Dir+"/productPage.html")
-				print sku+";"+product+";"+productUrl
-				break
+				if getUrl(productUrl, lvl3Dir+"/"+str(fileNumber)+"-productPage.html"):
+					sku = getSKU(lvl3Dir+"/"+str(fileNumber)+"-productPage.html")
+					if os.path.exists(lvl3Dir+"/list.sku"):
+						for skuLine in open(lvl3Dir+"/list.sku", "r"):
+							if sku in skuLine:
+								flag = 1
+					else:
+						writeFile(lvl3Dir+"/list.sku", sku)
+
+					if flag == 0:
+						print "["+str(datetime.datetime.now())+"][Level 3]["+prettyPrint(fileNumber)+"] ############################"
+						print "["+str(datetime.datetime.now())+"][Level 3]["+prettyPrint(fileNumber)+"] "+head
+						print "["+str(datetime.datetime.now())+"][Level 3]["+prettyPrint(fileNumber)+"] "+product
+						print "["+str(datetime.datetime.now())+"][Level 3]["+prettyPrint(fileNumber)+"] "+productUrl
+
+						getUrl(productUrl, lvl3Dir+"/"+str(fileNumber)+"-productPage.html")
+						appendFile(lvl3Dir+"/list.sku", sku)
+						if os.path.exists(lvl3Dir+"/productsList.csv"):
+							appendFile(lvl3Dir+"/productsList.csv", head+";"+product+";"+productUrl+"\n")
+						else:
+							writeFile(lvl3Dir+"/productsList.csv", "HEAD;PRODUCT;URL\n")
+							appendFile(lvl3Dir+"/productsList.csv", head+";"+product+";"+productUrl+"\n")
+					else:
+						print "SKU encontrado: " + sku, line.split("\"")[3]
+					break
+		fileNumber += 1

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import urllib2, gzip, time, datetime
+import urllib2, gzip, time, datetime, httplib, socket
 from StringIO import StringIO
 
 def getUrl (url, fileName):
@@ -11,38 +11,44 @@ def getUrl (url, fileName):
 	try:
 		httpReq = urllib2.urlopen(hr)
 	except urllib2.HTTPError:
-		print "["+str(datetime.datetime.now())+"][ERROR] "+url
-		print "["+str(datetime.datetime.now())+"][ERROR] That was an error with HTTP procol. Retryin in 10s..."
+		print "["+str(datetime.datetime.now())+"][ERROR] "+url.replace("\n", "")
+		print "["+str(datetime.datetime.now())+"][ERROR] There was an error with HTTP procol. Retryin in 10s..."
 		time.sleep(10)
 		httpReq = urllib2.urlopen(hr)
 		pass
 	except urllib2.URLError:
-		print "["+str(datetime.datetime.now())+"][ERROR] "+url
-		print "["+str(datetime.datetime.now())+"][ERROR] That was an error with URL. Retryin in 10s..."
+		print "["+str(datetime.datetime.now())+"][ERROR] "+url.replace("\n", "")
+		print "["+str(datetime.datetime.now())+"][ERROR] There was an error with URL. Retryin in 10s..."
 		time.sleep(10)
 		httpReq = urllib2.urlopen(hr)
 		pass
 	except httplib.HTTPException:
-		print "["+str(datetime.datetime.now())+"][ERROR] "+url
-		print "["+str(datetime.datetime.now())+"][ERROR] That was an exception with the HTTP protocol. Retryin in 10s..."
+		print "["+str(datetime.datetime.now())+"][ERROR] "+url.replace("\n", "")
+		print "["+str(datetime.datetime.now())+"][ERROR] There was an exception with the HTTP protocol. Retryin in 10s..."
 		time.sleep(10)
 		httpReq = urllib2.urlopen(hr)
 		pass
 	except httplib.BadStatusLine:
-		print "["+str(datetime.datetime.now())+"][ERROR] "+url
+		print "["+str(datetime.datetime.now())+"][ERROR] "+url.replace("\n", "")
 		print "["+str(datetime.datetime.now())+"][ERROR] Bad status line. Retryin in 10s..."
 		time.sleep(10)
 		httpReq = urllib2.urlopen(hr)
 		pass
 	except socket.timeout:
-		print "["+str(datetime.datetime.now())+"][ERROR] "+url
+		print "["+str(datetime.datetime.now())+"][ERROR] "+url.replace("\n", "")
 		print "["+str(datetime.datetime.now())+"][ERROR] Timeout. Retryin in 10s..."
 		time.sleep(10)
 		httpReq = urllib2.urlopen(hr)
 		pass
+	except httplib.IncompleteRead:
+		print "["+str(datetime.datetime.now())+"][ERROR] "+url.replace("\n", "")
+		print "["+str(datetime.datetime.now())+"][ERROR] Stream was incomplete. Retryin in 10s..."
+		time.sleep(10)
+		httpReq = urllib2.urlopen(hr)
+		pass
 	except Exception:
-		print "["+str(datetime.datetime.now())+"][ERROR] "+url
-		print "["+str(datetime.datetime.now())+"][ERROR] That was an unknown error. Retryin in 10s..."
+		print "["+str(datetime.datetime.now())+"][ERROR] "+url.replace("\n", "")
+		print "["+str(datetime.datetime.now())+"][ERROR] There was an unknown error. Retryin in 10s..."
 		time.sleep(10)
 		httpReq = urllib2.urlopen(hr)
 		pass
