@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import urllib2, gzip, time
+import urllib2, gzip, time, datetime
 from StringIO import StringIO
 
 def getUrl (url, fileName):
@@ -11,48 +11,50 @@ def getUrl (url, fileName):
 	try:
 		httpReq = urllib2.urlopen(hr)
 	except urllib2.HTTPError:
-		print "[ERROR] "+url
-		print "[ERROR] That was an error with HTTP procol. Retryin in 10s..."
+		print "["+str(datetime.datetime.now())+"][ERROR] "+url
+		print "["+str(datetime.datetime.now())+"][ERROR] That was an error with HTTP procol. Retryin in 10s..."
 		time.sleep(10)
 		httpReq = urllib2.urlopen(hr)
 		pass
 	except urllib2.URLError:
-		print "[ERROR] "+url
-		print "[ERROR] That was an error with URL. Retryin in 10s..."
+		print "["+str(datetime.datetime.now())+"][ERROR] "+url
+		print "["+str(datetime.datetime.now())+"][ERROR] That was an error with URL. Retryin in 10s..."
 		time.sleep(10)
 		httpReq = urllib2.urlopen(hr)
 		pass
 	except httplib.HTTPException:
-		print "[ERROR] "+url
-		print "[ERROR] That was an exception with the HTTP protocol. Retryin in 10s..."
+		print "["+str(datetime.datetime.now())+"][ERROR] "+url
+		print "["+str(datetime.datetime.now())+"][ERROR] That was an exception with the HTTP protocol. Retryin in 10s..."
 		time.sleep(10)
 		httpReq = urllib2.urlopen(hr)
 		pass
 	except httplib.BadStatusLine:
-		print "[ERROR] "+url
-		print "[ERROR] Bad status line. Retryin in 10s..."
+		print "["+str(datetime.datetime.now())+"][ERROR] "+url
+		print "["+str(datetime.datetime.now())+"][ERROR] Bad status line. Retryin in 10s..."
 		time.sleep(10)
 		httpReq = urllib2.urlopen(hr)
 		pass
 	except socket.timeout:
-		print "[ERROR] "+url
-		print "[ERROR] Timeout. Retryin in 10s..."
+		print "["+str(datetime.datetime.now())+"][ERROR] "+url
+		print "["+str(datetime.datetime.now())+"][ERROR] Timeout. Retryin in 10s..."
 		time.sleep(10)
 		httpReq = urllib2.urlopen(hr)
 		pass
 	except Exception:
-		import traceback
-		print traceback.format_exc()
-		print "[ERROR] "+url
-		print "[ERROR] That was an unknown error. Retryin in 10s..."
+		print "["+str(datetime.datetime.now())+"][ERROR] "+url
+		print "["+str(datetime.datetime.now())+"][ERROR] That was an unknown error. Retryin in 10s..."
 		time.sleep(10)
 		httpReq = urllib2.urlopen(hr)
 		pass
 
 	if httpReq.info().get('Content-Encoding') == 'gzip':
-		buf = StringIO(httpReq.read())
-		f = gzip.GzipFile(fileobj=buf)
-		data = f.read()
+		try:
+			buf = StringIO(httpReq.read())
+			f = gzip.GzipFile(fileobj=buf)
+			data = f.read()
+		except IOError:
+			print "["+str(datetime.datetime.now())+"][ERROR] Cant gunzip the stream"
+			return None
 	else:
 		data = httpReq.read()
 
@@ -66,7 +68,7 @@ def getUrl (url, fileName):
 			fd1.write(data.replace("><", ">\n<"))
 		fd1.close()
 	except:
-		print "Erro: Canno't create file "+fileName
+		print "["+str(datetime.datetime.now())+"][ERROR]: Canno't create file "+fileName
 		return None
 	else:
 		return True
