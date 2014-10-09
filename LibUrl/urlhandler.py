@@ -60,7 +60,7 @@ def getUrl (url, fileName):
 			data = f.read()
 		except IOError:
 			print "["+str(datetime.datetime.now())+"][ERROR] Cant gunzip the stream"
-			return None
+			return False
 	else:
 		data = httpReq.read()
 
@@ -75,6 +75,6 @@ def getUrl (url, fileName):
 		fd1.close()
 	except:
 		print "["+str(datetime.datetime.now())+"][ERROR]: Canno't create file "+fileName
-		return None
+		return False
 	else:
 		return True
