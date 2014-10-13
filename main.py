@@ -191,32 +191,49 @@ for line in fd:
 	threadsList = []
 	for number in range(0, 10):
 		threadsList.append(threading.Thread(target=getLvlThree, args=(line, fileNumber)))
-		line = next(fd)
-		fileNumber += 1
-
+		try:
+			line = next(fd)
+			fileNumber += 1
+		except:
+			break
 	# Start thread
 	for threadLine in threadsList:
-		threadLine.start()
+		try:
+			threadLine.start()
+		except:
+			break
 
 	# Waiting for thread to end
 	for threadLine in threadsList:
-		threadLine.join()
+		try:
+			threadLine.join()
+		except:
+			break
 
 if os.path.exists(lvlThreeDir+"/errors.url"):
 	fileNumber = 0
 	for line in open(lvlThreeDir+"/errors.url"):
 		for number in range(0, 2):
 			threadsList.append(threading.Thread(target=getLvlThree, args=(line, fileNumber)))
-			line = next(fd)
-			fileNumber += 1
+			try:
+				line = next(fd)
+				fileNumber += 1
+			except:
+				continue
 
 		# Start thread
 		for threadLine in threadsList:
-			threadLine.start()
+			try:
+				threadLine.start()
+			except:
+				continue
 
 		# Waiting for thread to end
 		for threadLine in threadsList:
-			threadLine.join()
+			try:
+				threadLine.join()
+			except:
+				continue
 
 # Gambiarra -> Sometimes threading.Lock() doesn't work... :(
 lines_seen = set()
