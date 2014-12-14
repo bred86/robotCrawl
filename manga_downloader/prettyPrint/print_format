@@ -1,0 +1,7 @@
+#!/usr/bin/python
+
+def print_fromat (number):
+	if number < 10:
+		numStr = "00"+str(number)
+	else number < 100:
+		numStr = "0"+str(number)
