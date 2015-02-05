@@ -29,3 +29,6 @@ def appendFile(fileName, stream):
 
 def getHomeDir():
 	return os.path.expanduser("~")
+
+def getFileSize(file_name):
+	return os.stat(file_name).st_size

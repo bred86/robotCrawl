@@ -10,6 +10,7 @@ exist 			= osFunc.existFile
 writeFile 		= osFunc.writeFile
 appendFile 		= osFunc.appendFile
 home_dir		= osFunc.getHomeDir()
+getFileSize		= osFunc.getFileSize
 
 numFormat 		= prettyPrint.num_format
 logInfo			= prettyPrint.info
@@ -89,7 +90,16 @@ if mkdir(volumeDir):
 			folder = numFormat(number)+"-"+numFormat(number + 99)
 			mkdir(volumeDir+"/"+folder)
 			print folder
-		getUrl(returnImageUrl(volumeDownload+"_"+numFormat(number)+"_0001.html"), volumeDir+"/"+folder+"/cap_"+numFormat(number)+"_"+numFormat(number)+".jpg")
+		
+		image_size_header 	= 1
+		image_size_file 	= 0
+		while (int(image_size_header) > int(image_size_file)):
+			ret_val, image_size_header = getUrl(returnImageUrl(volumeDownload+"_"+numFormat(number)+"_0001.html"), volumeDir+"/"+folder+"/cap_"+numFormat(number)+"_"+numFormat(number)+".jpeg")
+			if ret_val:
+				image_size_file = getFileSize(volumeDir+"/"+folder+"/cap_"+numFormat(number)+"_"+numFormat(number)+".jpeg")
+			else:
+				image_size_header 	= 1
+				image_size_file 	= 0
 
 		# Grabbing the next page image's url
 		for page in range(1, 1002):
@@ -108,6 +118,13 @@ if mkdir(volumeDir):
 			else:
 				logInfo(manga_name+" "+numFormat(number)+" / "+numFormat((page + 1)))
 
-			getUrl(returnImageUrl(volumeDownload+"_"+numFormat(number)+"_"+numFormat(page + 1)+".html"), volumeDir+"/"+folder+"/cap_"+numFormat(number)+"_"+numFormat(page + 1)+".jpg")
-
+			image_size_header 	= 1
+			image_size_file 	= 0
+			while (int(image_size_header) > int(image_size_file)):
+				ret_val, image_size_header = getUrl(returnImageUrl(volumeDownload+"_"+numFormat(number)+"_"+numFormat(page + 1)+".html"), volumeDir+"/"+folder+"/cap_"+numFormat(number)+"_"+numFormat(page + 1)+".jpeg")
+				if ret_val:
+					image_size_file = getFileSize(volumeDir+"/"+folder+"/cap_"+numFormat(number)+"_"+numFormat(page + 1)+".jpeg")
+				else:
+					image_size_header 	= 1
+					image_size_file 	= 0
 
