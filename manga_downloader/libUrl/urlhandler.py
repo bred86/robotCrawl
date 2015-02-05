@@ -8,6 +8,7 @@ logInfo			= prettyPrint.info
 logError		= prettyPrint.error
 
 def getUrl (url, fileName):
+	file_size = 0
 	hr = urllib2.Request(url)
 	hr.add_header("User-Agent:", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1")
 	hr.add_header("Accept:", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
@@ -63,6 +64,8 @@ def getUrl (url, fileName):
 			logError("There was an unknown error. Retryin in 60s...")
 			time.sleep(60)
 			httpReq = urllib2.urlopen(hr)
+	else:
+		file_size = httpReq.headers["Content-Length"]
 
 	if httpReq.info().get('Content-Encoding') == 'gzip':
 		try:
@@ -78,8 +81,8 @@ def getUrl (url, fileName):
 	httpReq.close()
 
 	try:
-		fd1 = open(fileName, "w")
-		if ("lvl1" in fileName) or ("lvl3" in fileName):
+		fd1 = open(fileName, "wb")
+		if ("lvl1" in fileName) or ("lvl3" in fileName) or (".jpg" in fileName) or (".png" in fileName) or (".gif" in fileName) or (".jpeg" in fileName):
 			fd1.write(data)
 		else:
 			fd1.write(data.replace("><", ">\n<"))
@@ -88,4 +91,4 @@ def getUrl (url, fileName):
 		logError("Canno't create file "+fileName)
 		return False
 	else:
-		return True
+		return True, file_size
