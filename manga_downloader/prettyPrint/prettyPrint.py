@@ -6,8 +6,10 @@ def num_format (number):
 	numStr = ""
 
 	if number < 10:
-		numStr = "00"+str(number)
+		numStr = "000"+str(number)
 	elif number < 100:
+		numStr = "00"+str(number)
+	elif number < 1000:
 		numStr = "0"+str(number)
 
 	return numStr

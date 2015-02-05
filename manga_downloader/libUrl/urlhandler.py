@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import prettyPrint
-import urllib2, gzip, time, datetime, httplib, socket
+import urllib2, gzip, time, datetime, httplib, socket, errno
 from StringIO import StringIO
 
 logInfo			= prettyPrint.info
@@ -56,6 +56,13 @@ def getUrl (url, fileName):
 		time.sleep(10)
 		httpReq = urllib2.urlopen(hr)
 		pass
+	except SocketError:
+		# [Errno 104] Connection reset by peer
+		if SocketError.errno == errno.ECONNRESET:
+			logError(url.replace("\n", ""))
+			logError("There was an unknown error. Retryin in 60s...")
+			time.sleep(60)
+			httpReq = urllib2.urlopen(hr)
 
 	if httpReq.info().get('Content-Encoding') == 'gzip':
 		try:
