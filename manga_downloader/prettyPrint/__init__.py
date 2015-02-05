@@ -1,1 +1,4 @@
-from print_fromat import numFormat
+from prettyPrint import num_format
+from prettyPrint import info
+from prettyPrint import error
+from prettyPrint import warn
