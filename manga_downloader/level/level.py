@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-import fileinput
-
 def returnUrl(file_name, manga_name):
 	base_url = None
 
