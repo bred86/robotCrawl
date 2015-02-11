@@ -63,6 +63,7 @@ if not getUrl(urlMaster + manga_url, volumePage):
 	exit(255)
 else:
 	logInfo(manga_name+"'s volume page downloaded")
+	logInfo(volumeDir)
 
 if mkdir(volumeDir):
 	logInfo("Created \" " + rootDir + "/" + volumeName + "\" folder")
@@ -70,40 +71,28 @@ if mkdir(volumeDir):
 	folder = "0001-0100"
 	mkdir(volumeDir+"/"+folder)
 	for number in range(1, 10000):
-		retry_first = 1
-
-		# Grabbing the first page image's url
-		pageUrl = returnUrl(volumePage, manga_name + " " + str(number))
-		if pageUrl is None:
-			break
-
-		if not getUrl(urlMaster+pageUrl, volumeDownload+"_"+numFormat(number)+"_0001.html"):
-			logWarn("Retryin for "+manga_name+" "+numFormat(number)+"["+numFormat(retry_first)+"/5 ]")
-			if retry_first <= 5:
-				number 	-= 1
-				retry_first 	+= 1
-				continue
-		else:
-			logInfo(manga_name+" "+numFormat(number)+" / 0001")
-
-		if ((number-1)%100 == 0) and (number > 1):
+		if ((number-1)%100 == 0) and (number >= 1):
 			folder = numFormat(number)+"-"+numFormat(number + 99)
 			mkdir(volumeDir+"/"+folder)
 			print folder
 		
-		image_size_header 	= 1
-		image_size_file 	= 0
-		while (int(image_size_header) > int(image_size_file)):
-			ret_val, image_size_header = getUrl(returnImageUrl(volumeDownload+"_"+numFormat(number)+"_0001.html"), volumeDir+"/"+folder+"/cap_"+numFormat(number)+"_"+numFormat(number)+".jpeg")
-			if ret_val:
-				image_size_file = getFileSize(volumeDir+"/"+folder+"/cap_"+numFormat(number)+"_"+numFormat(number)+".jpeg")
-			else:
-				image_size_header 	= 1
-				image_size_file 	= 0
-
 		# Grabbing the next page image's url
-		for page in range(1, 1002):
+		for page in range(1, 1001):
 			retry_next = 1
+
+			if page == 1:
+				pageUrl = returnUrl(volumePage, manga_name + " " + str(number))
+				if pageUrl is None:
+					break
+
+				if not getUrl(urlMaster+pageUrl, volumeDownload+"_"+numFormat(number)+"_0001.html"):
+					logWarn("Retryin for "+manga_name+" "+numFormat(number)+"["+numFormat(retry_next)+"/5 ]")
+					if retry_next <= 5:
+						number 	-= 1
+						retry_next 	+= 1
+						continue
+				else:
+					logInfo(manga_name+" "+numFormat(number)+" / 0001")
 
 			pageUrl = returnPageUrl(volumeDownload+"_"+numFormat(number)+"_"+numFormat(page)+".html", (page + 1))
 			if pageUrl is None:
