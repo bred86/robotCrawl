@@ -5,7 +5,7 @@ def returnUrl(file_name, manga_name):
 
 	fp = open(file_name, "r")
 	for line in fp:
-		if (">"+manga_name+"<" in line) or ("> "+manga_name+"<" in line) or (">"+manga_name+" <" in line):
+		if (">"+manga_name.lower()+"<" in line.lower()) or ("> "+manga_name.lower()+"<" in line.lower()) or (">"+manga_name.lower()+" <" in line.lower()):
 			if "<a href=\"" in line:
 				base_url = line.split("\"")[1]
 
