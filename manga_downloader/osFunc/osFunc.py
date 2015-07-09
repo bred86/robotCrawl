@@ -32,3 +32,19 @@ def getHomeDir():
 
 def getFileSize(file_name):
 	return os.stat(file_name).st_size
+
+def getLastFile(path):
+	list_dir = []
+	list_dir = os.listdir(path)
+	list_dir.sort()
+	list_dir.reverse()
+
+	return list_dir[0]
+
+def getLastFolder(path):
+	list_dir = []
+	list_dir = os.listdir(path)
+	list_dir.sort()
+	list_dir.reverse()
+
+	return list_dir[0]
