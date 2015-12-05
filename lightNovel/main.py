@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import urllib3, collections
+import urllib3, collections, sys
 
 def download_file(url, fileName="home.html"):
     http = urllib3.PoolManager()
@@ -46,6 +46,19 @@ def separate_menu(homeName, menuName="menu_xianxia.csv"):
 fileName = "home.html"
 menuName = "menu_xianxia.csv"
 
-# Download Site Home
-fileName = download_file("http://www.wuxiaworld.com/")
+# Main
+# fileName = download_file("http://www.wuxiaworld.com/")
 menuName = separate_menu(fileName)
+
+with open(menuName, "r") as entry:
+    for key in entry:
+        name = key.split(",")[0].split("\"")[1]
+        url = key.split(",")[1].split("\"")[1]
+        if len(sys.argv) > 1:
+            for it in range(1, len(sys.argv)):
+                if sys.argv[it].lower() in name.lower():
+                    print("Downloading '%s' ..." % name)
+                    download_file(url, name.lower().replace(" ","_") + "_index.html")
+        else:
+            print("Downloading '%s' ..." % name)
+            download_file(url, name.lower().replace(" ","_") + "_index.html")
